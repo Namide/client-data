@@ -6,6 +6,7 @@
     <meta name="description" content="">
     <meta name="author" content="Damien Doussaud (namide.com)">
     <meta name="viewport" content="width=device-width,initial-scale=1">
+    <script src="//cdn.webglstats.com/stat.js" defer="defer" async="async"></script>
     <style>
         th, td { text-align: left; }
     </style>
@@ -30,6 +31,9 @@
         
         <h2>Browser</h2>
         <section id="browser"></section>
+
+        <h2>Links</h2>
+        <a href="http://webglreport.com/">webglreport.com</a>
     </main>
     
     <footer></footer>
@@ -43,6 +47,8 @@
 
         // source: https://stackoverflow.com/questions/5063489/how-can-you-get-the-css-pixel-device-pixel-ratio
         window.getDevicePixelRatio=function(){return void 0!==window.screen.systemXDPI&&void 0!==window.screen.logicalXDPI&&window.screen.systemXDPI>window.screen.logicalXDPI?window.screen.systemXDPI/window.screen.logicalXDPI:void 0!==window.devicePixelRatio?window.devicePixelRatio:1};
+    
+        // source: https://github.com/AnalyticalGraphicsInc/webglreport
     </script>
     
     <script>
@@ -57,9 +63,13 @@
         qs('#cpu').innerHTML = cpuTable.getHtml();
         
         
+        // http://webglstats.com
         var gpuTable = new Table();
+        var webgl = webgl();
+        gpuTable.add('Experimental Webgl', webgl.experimentalWebgl);
+        gpuTable.add('Webgl', webgl.webgl);
+        gpuTable.add('Webgl 2', webgl.webgl2);
         qs('#gpu').innerHTML = gpuTable.getHtml();
-        
         
         var osTable = new Table();
         osTable.add('OS', jscd.os +' '+ jscd.osVersion);
@@ -78,6 +88,25 @@
         
         // Helpers
         function qs(selector) { return document.body.querySelector(selector) }
+
+        function webgl() {
+            var out = { a: 1 }
+            var canvas, ctx, exts;
+
+            try {
+                canvas = document.createElement('canvas');
+                ctx = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+                exts = ctx.getSupportedExtensions();
+
+                out.webgl = canvas.getContext('webgl') ? 'enable' : 'disabled'
+                out.experimentalWebgl = canvas.getContext('experimental-webgl') ? 'enable' : 'disabled'
+                out.webgl2 = canvas.getContext('webgl2') ? 'enable' : 'disabled'
+            } catch (e) { }
+
+            canvas = undefined;
+
+            return out;
+        }
 
         function Table() {
             var list = [];
