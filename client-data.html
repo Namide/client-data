@@ -52,6 +52,9 @@
     </script>
     
     <script>
+        
+        var YES = 'enable'
+        var NO = 'disable'
 
         var supportTable = new Table();
         supportTable.add('Mobile', jscd.mobile);
@@ -69,6 +72,10 @@
         gpuTable.add('Experimental Webgl', webgl.experimentalWebgl);
         gpuTable.add('Webgl', webgl.webgl);
         gpuTable.add('Webgl 2', webgl.webgl2);
+        gpuTable.add('Max text size', webgl.maxTextSize);
+        gpuTable.add('Max text img unit', webgl.maxTexImgUnit);
+        gpuTable.add('Vendor', webgl.vendor);
+        gpuTable.add('Renderer', webgl.renderer);
         qs('#gpu').innerHTML = gpuTable.getHtml();
         
         var osTable = new Table();
@@ -90,17 +97,32 @@
         function qs(selector) { return document.body.querySelector(selector) }
 
         function webgl() {
-            var out = { a: 1 }
+            var out = {
+                webgl: NO,
+                experimentalWebgl: NO,
+                webgl2: NO,
+                maxTextSize: NO,
+                maxTexImgUnit: NO,
+                vendor: NO,
+                model: NO
+            }
             var canvas, ctx, exts;
 
             try {
                 canvas = document.createElement('canvas');
-                ctx = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
-                exts = ctx.getSupportedExtensions();
+                gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+                exts = gl.getSupportedExtensions();
 
-                out.webgl = canvas.getContext('webgl') ? 'enable' : 'disabled'
-                out.experimentalWebgl = canvas.getContext('experimental-webgl') ? 'enable' : 'disabled'
-                out.webgl2 = canvas.getContext('webgl2') ? 'enable' : 'disabled'
+                out.webgl = canvas.getContext('webgl') ? YES : NO;
+                out.experimentalWebgl = canvas.getContext('experimental-webgl') ? YES : NO;
+                out.webgl2 = canvas.getContext('webgl2') ? YES : NO;
+                
+                out.maxTextSize = gl.getParameter(gl.MAX_TEXTURE_SIZE);
+                out.maxTexImgUnit = gl.getParameter(gl.MAX_TEXTURE_IMAGE_UNITS);
+                
+                var debugInfo = gl.getExtension('WEBGL_debug_renderer_info');
+                out.vendor = gl.getParameter(debugInfo.UNMASKED_VENDOR_WEBGL);
+                out.renderer = gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL);
             } catch (e) { }
 
             canvas = undefined;
